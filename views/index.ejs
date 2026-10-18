@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo" style="text-decoration: none;">Connectify ✨</a>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <a href="/" style="color: #818cf8; text-decoration: none; font-weight: 600;">Feed</a>
+            <a href="/explore" style="color: white; text-decoration: none; font-weight: 500;">Discover People</a>
+            <div class="user-pill">
+                <img src="<%= currentUser.avatar %>" class="avatar-nav" alt="user">
+                <span><%= currentUser.username %></span>
+            </div>
+            <a href="/logout" style="color: #ef4444; text-decoration: none; font-weight: 600; font-size: 0.9rem;">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container feed-layout">
+        <!-- Left: My Passport Profile Card -->
+        <aside>
+            <div class="glass-panel" style="text-align: center;">
+                <img src="<%= currentUser.avatar %>" class="passport-avatar" alt="profile">
+                <h3><%= currentUser.username %></h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 5px;"><%= currentUser.bio %></p>
+
+                <div style="display: flex; justify-content: space-around; margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 10px;">
+                    <div>
+                        <strong><%= currentUser.followers ? currentUser.followers.length : 0 %></strong>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">Followers</div>
+                    </div>
+                    <div>
+                        <strong><%= currentUser.following ? currentUser.following.length : 0 %></strong>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">Following</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right: Posts Feed -->
+        <main>
+            <div class="glass-panel create-post" style="margin-bottom: 20px;">
+                <form action="/posts" method="POST">
+                    <textarea name="content" placeholder="What's on your mind, <%= currentUser.username %>?" required></textarea>
+                    <input type="text" name="imageUrl" placeholder="Image URL (Optional)" style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: white; padding: 8px 12px; border-radius: 8px; margin-bottom: 10px; outline: none;">
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button type="submit" class="btn-primary">Post</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="feed">
+                <% if (posts.length === 0) { %>
+                    <div class="glass-panel" style="text-align: center; color: var(--text-muted);">No posts yet. Share something!</div>
+                <% } else { %>
+                    <% posts.forEach(post => { %>
+                        <div class="glass-panel" style="margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                <a href="/users/<%= post.author ? post.author._id : '#' %>">
+                                    <img src="<%= post.author ? post.author.avatar : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop' %>" class="avatar-nav" alt="author">
+                                </a>
+                                <div>
+                                    <a href="/users/<%= post.author ? post.author._id : '#' %>" style="color: white; text-decoration: none; font-weight: 600; font-size: 0.95rem;">
+                                        <%= post.author ? post.author.username : 'Anonymous' %>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <p style="font-size: 0.95rem; line-height: 1.5;"><%= post.content %></p>
+                            <% if (post.imageUrl) { %>
+                                <img src="<%= post.imageUrl %>" class="post-image" alt="Post attachment">
+                            <% } %>
+
+                            <!-- Like Button -->
+                            <div style="margin-top: 12px; display: flex; align-items: center; gap: 10px;">
+                                <form action="/posts/<%= post._id %>/like" method="POST">
+                                    <% const hasLiked = post.likes.some(id => id.toString() === currentUser._id.toString()); %>
+                                    <button type="submit" style="background: none; border: none; color: <%= hasLiked ? '#ef4444' : '#818cf8' %>; cursor: pointer; font-weight: 600;">
+                                        <%= hasLiked ? '❤️' : '🤍' %> <%= post.likes.length %> Likes
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Comments -->
+                            <div style="margin-top: 12px; border-top: 1px solid var(--border-color); padding-top: 10px;">
+                                <% if (post.comments) { %>
+                                    <% post.comments.forEach(comment => { %>
+                                        <div style="font-size: 0.85rem; margin-bottom: 5px;">
+                                            <strong style="color: #cbd5e1;"><%= comment.user ? comment.user.username : 'User' %>:</strong>
+                                            <span style="color: var(--text-muted);"><%= comment.text %></span>
+                                        </div>
+                                    <% }) %>
+                                <% } %>
+                                <form action="/posts/<%= post._id %>/comment" method="POST" style="display: flex; gap: 8px; margin-top: 8px;">
+                                    <input type="text" name="text" placeholder="Write a comment..." required style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: white; padding: 6px 10px; border-radius: 6px; outline: none; font-size: 0.85rem;">
+                                    <button type="submit" class="btn-small">Reply</button>
+                                </form>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } %>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

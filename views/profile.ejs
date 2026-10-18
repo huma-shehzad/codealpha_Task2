@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connectify | <%= profileUser.username %>'s Profile</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo" style="text-decoration: none;">Connectify ✨</a>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <a href="/" style="color: white; text-decoration: none; font-weight: 500;">Feed</a>
+            <a href="/explore" style="color: #818cf8; text-decoration: none; font-weight: 600;">Discover People</a>
+            <div class="user-pill">
+                <img src="<%= currentUser.avatar %>" class="avatar-nav" alt="user">
+                <span><%= currentUser.username %></span>
+            </div>
+            <a href="/logout" style="color: #ef4444; text-decoration: none; font-weight: 600; font-size: 0.9rem;">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container" style="max-width: 700px;">
+        <!-- User Profile Header -->
+        <div class="glass-panel" style="text-align: center; margin-bottom: 25px;">
+            <img src="<%= profileUser.avatar %>" class="passport-avatar" alt="avatar">
+            <h2><%= profileUser.username %></h2>
+            <p style="color: var(--text-muted); margin: 8px 0 15px;"><%= profileUser.bio %></p>
+
+            <div style="display: flex; justify-content: center; gap: 30px; margin-bottom: 15px;">
+                <div><strong><%= profileUser.followers.length %></strong> <span style="color: var(--text-muted); font-size: 0.85rem;">Followers</span></div>
+                <div><strong><%= profileUser.following.length %></strong> <span style="color: var(--text-muted); font-size: 0.85rem;">Following</span></div>
+            </div>
+
+            <% if (currentUser._id.toString() !== profileUser._id.toString()) { %>
+                <% const isFollowing = currentUser.following.some(id => id.toString() === profileUser._id.toString()); %>
+                <% if (isFollowing) { %>
+                    <form action="/users/<%= profileUser._id %>/unfollow" method="POST">
+                        <button type="submit" class="btn-small" style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444; padding: 8px 20px;">Unfollow</button>
+                    </form>
+                <% } else { %>
+                    <form action="/users/<%= profileUser._id %>/follow" method="POST">
+                        <button type="submit" class="btn-primary" style="padding: 8px 20px;">Follow</button>
+                    </form>
+                <% } %>
+            <% } %>
+        </div>
+
+        <!-- User Posts -->
+        <h3><%= profileUser.username %>'s Posts</h3>
+        <div class="feed" style="margin-top: 15px;">
+            <% if (posts.length === 0) { %>
+                <p style="color: var(--text-muted);">No posts shared yet.</p>
+            <% } else { %>
+                <% posts.forEach(post => { %>
+                    <div class="glass-panel" style="margin-bottom: 20px;">
+                        <p style="font-size: 0.95rem;"><%= post.content %></p>
+                        <% if (post.imageUrl) { %>
+                            <img src="<%= post.imageUrl %>" class="post-image" alt="Post attachment">
+                        <% } %>
+
+                        <!-- Likes -->
+                        <div style="margin-top: 12px;">
+                            <form action="/posts/<%= post._id %>/like" method="POST">
+                                <% const hasLiked = post.likes.some(id => id.toString() === currentUser._id.toString()); %>
+                                <button type="submit" style="background: none; border: none; color: <%= hasLiked ? '#ef4444' : '#818cf8' %>; cursor: pointer; font-weight: 600;">
+                                    <%= hasLiked ? '❤️' : '🤍' %> <%= post.likes.length %> Likes
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Comments -->
+                        <div style="margin-top: 12px; border-top: 1px solid var(--border-color); padding-top: 10px;">
+                            <% if (post.comments) { %>
+                                <% post.comments.forEach(comment => { %>
+                                    <div style="font-size: 0.85rem; margin-bottom: 5px;">
+                                        <strong><%= comment.user ? comment.user.username : 'User' %>:</strong> <%= comment.text %>
+                                    </div>
+                                <% }) %>
+                            <% } %>
+                            <form action="/posts/<%= post._id %>/comment" method="POST" style="display: flex; gap: 8px; margin-top: 8px;">
+                                <input type="text" name="text" placeholder="Write a comment..." required style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: white; padding: 6px 10px; border-radius: 6px; outline: none; font-size: 0.85rem;">
+                                <button type="submit" class="btn-small">Reply</button>
+                            </form>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } %>
+        </div>
+    </div>
+</body>
+</html>

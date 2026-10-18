@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connectify | Discover People</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .people-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .user-card {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .user-card-link {
+            text-decoration: none;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo" style="text-decoration: none;">Connectify ✨</a>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <a href="/" style="color: white; text-decoration: none; font-weight: 500;">Feed</a>
+            <a href="/explore" style="color: #818cf8; text-decoration: none; font-weight: 600;">Discover People</a>
+            <div class="user-pill">
+                <img src="<%= currentUser.avatar %>" class="avatar-nav" alt="user">
+                <span><%= currentUser.username %></span>
+            </div>
+            <a href="/logout" style="color: #ef4444; text-decoration: none; font-weight: 600; font-size: 0.9rem;">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Discover People 🔍</h2>
+        <form action="/explore" method="GET" style="margin-top: 15px;">
+            <input type="text" name="search" placeholder="Search users by username..." value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 10px; color: white; outline: none;">
+        </form>
+
+        <div class="people-grid">
+            <% if (users.length === 0) { %>
+                <p style="color: var(--text-muted);">No users found.</p>
+            <% } else { %>
+                <% users.forEach(user => { %>
+                    <div class="glass-panel user-card">
+                        <!-- Clickable Link to User Profile Page -->
+                        <a href="/users/<%= user._id %>" class="user-card-link">
+                            <img src="<%= user.avatar %>" class="passport-avatar" style="width: 90px; height: 110px;" alt="avatar">
+                            <h3 style="font-size: 1rem;"><%= user.username %></h3>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 5px 0 10px;"><%= user.bio %></p>
+                        </a>
+
+                        <% const isFollowing = currentUser.following.some(id => id.toString() === user._id.toString()); %>
+                        <% if (isFollowing) { %>
+                            <form action="/users/<%= user._id %>/unfollow" method="POST" style="width: 100%;">
+                                <button type="submit" class="btn-small" style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444; width: 100%;">Unfollow</button>
+                            </form>
+                        <% } else { %>
+                            <form action="/users/<%= user._id %>/follow" method="POST" style="width: 100%;">
+                                <button type="submit" class="btn-primary" style="width: 100%; padding: 6px;">Follow</button>
+                            </form>
+                        <% } %>
+                    </div>
+                <% }) %>
+            <% } %>
+        </div>
+    </div>
+</body>
+</html>

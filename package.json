@@ -1,0 +1,17 @@
+{
+  "name": "connectify",
+  "version": "1.0.0",
+  "description": "A modern social media platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "ejs": "^3.1.9",
+    "express": "^4.19.2",
+    "express-session": "^1.19.0",
+    "mongoose": "^8.2.1"
+  }
+}
